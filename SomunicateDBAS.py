@@ -38,7 +38,7 @@ def find_closest_sound(user_ratings, dimensions, data):
 file_path = "240620_median_rating_data.csv"
 
 # relative path to the audio files directory
-audio_files_dir = "HiDrive-audio_data"
+audio_files_dir = "/your path to the HiDrive-audio_data folder/"
 
 # load and prepare data
 data, rating_columns = load_data(file_path)
