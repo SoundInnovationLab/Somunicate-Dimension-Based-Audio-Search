@@ -14,7 +14,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 import numpy as np
 import base64
-import matplotlib.pyplot as plt
 
 # Function Header: loads the csv file data into two lists,
 # one including all of the data from the file, and one including only
@@ -80,8 +79,8 @@ def find_closest_sound_mahalanobis(user_ratings, dimensions, data, inv_cov_matri
 # relative path to median rating data
 median_path = "240620_median_rating_data.csv"
 
-# relative path to the audio files directory
-audio_files_dir = "HiDrive-audio_data"
+# path to the audio files directory
+audio_files_dir = "/Your path to the HiDrive-audio_data folder/" # IMPORTANT
 
 # relative path to correlation file
 corr_path = "correlations.csv"
