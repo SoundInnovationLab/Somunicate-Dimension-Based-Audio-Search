@@ -1,6 +1,7 @@
 # Created by Max Rodriguez
+# Supervisor: Dr. Steffan Lepa
 # Project for the Somunicate Team at TU Berlin
-# Date: 28.06.2024
+# Date: 01.07.2024
 # Description: This project involves developing a web-based 
 # application using Streamlit that allows users to find and 
 # play audio files based on their selected ratings across 
@@ -78,10 +79,8 @@ def find_closest_sound_mahalanobis(user_ratings, dimensions, data, inv_cov_matri
 
 # relative path to median rating data
 median_path = "240620_median_rating_data.csv"
-
-# path to the audio files directory
-audio_files_dir = "/Your path to the HiDrive-audio_data folder/" # IMPORTANT
-
+# relative path to the audio files directory
+audio_files_dir = "HiDrive-audio_data" # INSERT YOUR RELATIVE PATH TO THE FOLDER
 # relative path to correlation file
 corr_path = "correlations.csv"
 
@@ -89,29 +88,26 @@ corr_path = "correlations.csv"
 data, rating_columns = load_median_data(median_path)
 corr_matrix = load_correlation_data(corr_path)
 
-# Calculate the standard deviation for each of the 19 dimensions
-std_devs = data[rating_columns].std()
+def std_matrix_setup(rate_cols):
+
+    # Ensure standard deviation matrix is a NumPy array of floats
+    return np.diag(data[rate_cols].std().astype(float))
 
 # Create a diagonal matrix with the standard deviations
-std_diag_matrix = np.diag(std_devs)
+std_diag_matrix = std_matrix_setup(rating_columns)
 
-# Convert correlation matrix to NumPy array
-corr_matrix = load_correlation_data(corr_path).iloc[:, 1:].to_numpy()
-# Scale based on -1 to 1 rating range
-corr_matrix = (corr_matrix * 2) - 1
+def corr_matrix_setup(corr_path):
+    # Convert correlation matrix to NumPy array
+    corr_matrix = load_correlation_data(corr_path).iloc[:, 1:].to_numpy()
 
-# Ensure standard deviation matrix is a NumPy array of floats
-std_diag_matrix = np.diag(data[rating_columns].std().astype(float))
+    # Scale based on -1 to 1 rating range
+    return (corr_matrix * 2) - 1
+
+# Set up a matrix of bi-dimensional correlations
+corr_matrix = corr_matrix_setup(corr_path)
 
 # Calculate the inverse of the covariance matrix for Mahalanobis distance
 inv_cov_matrix = np.linalg.inv(std_diag_matrix @ corr_matrix @ std_diag_matrix)
-
-# Display the matrices for verification
-# st.write("Standard Deviation Diagonal Matrix:")
-# st.write(pd.DataFrame(std_diag_matrix, columns=rating_columns, index=rating_columns))
-
-# st.write("Inverse Covariance Matrix:")
-# st.write(pd.DataFrame(inv_cov_matrix, columns=rating_columns, index=rating_columns))
 
 # German translations for each English dimension
 dimension_translations = {
@@ -137,24 +133,28 @@ dimension_translations = {
 }
 
 # Function header: get the dimension in German
-def get_bilingual_dimension(dimension):
+def get_bilingual_dimension(dimension, dimension_translations):
     return f"{dimension} ({dimension_translations[dimension]})"
 
 st.write("Select from the dimensions shown in the following list:")
 st.write("Wählen Sie aus den in der folgenden Liste angezeigten Dimensionen:")
 
-# allow user to multiselect dimensions
-selected_dimensions = st.multiselect(
-    "Select dimensions (Dimensionen auswählen)",
-    options=[get_bilingual_dimension(dim) for dim in rating_columns]
-)
+# Display checkboxes for each dimension
+selected_dimensions = []
+for dimension in dimension_translations:
+    bilingual_dimension = get_bilingual_dimension(dimension, dimension_translations)
+    if st.checkbox(bilingual_dimension):
+        selected_dimensions.append(dimension)
 
-if len(selected_dimensions) == 0:
-    st.warning("Please select at least 1 dimension. (Bitte wählen Sie mindestens 1 Dimension aus.)")
+num_dim = len(selected_dimensions)
+if num_dim == 0:
+    st.warning("Please select at least 1 dimension. (Bitte wählen Sie mindestens 1 Dimension aus)")
 else:
-    st.success(f"You have selected: {selected_dimensions}")
-    st.success(f"Sie haben ausgewählt: {selected_dimensions}")
-
+    if (num_dim > 1):
+        st.write(f"You have selected {num_dim} dimensions. (Sie haben {num_dim} Dimensionen ausgewählt)")
+    else:
+        st.write(f"You have selected {num_dim} dimension. (Sie haben {num_dim} Dimension ausgewählt)")
+    
     # user input for the selected dimensions using sliders
     user_ratings = []
     for dimension in selected_dimensions:
