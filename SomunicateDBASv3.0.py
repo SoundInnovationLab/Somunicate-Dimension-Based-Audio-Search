@@ -16,6 +16,28 @@ import streamlit.components.v1 as components
 import numpy as np
 import base64
 
+st.markdown("<center><h1 style='color: violet;'>Welcome to Somunicate Audio Search</h1></center>", unsafe_allow_html=True)
+
+# Description section
+st.markdown("<center><p style='font-size: 1.2em;'>An audio search algorithm designed to help you find a sound tailored to your preferences.</p></center>", unsafe_allow_html=True)
+
+# How It Works section
+st.markdown("<center><h2 style='font-size: 2em; color: #2196F3;'>How It Works:</h2></center>", unsafe_allow_html=True)
+st.markdown("<ol style='font-size: 1.2em;'>", unsafe_allow_html=True)
+st.markdown("<li><strong>Select Your Dimensions:</strong> Choose from 19 distinct sound dimensions, each capturing a unique aspect of audio quality.</li>", unsafe_allow_html=True)
+st.markdown("<li><strong>Rate Each Dimension:</strong> Provide your ratings for each chosen dimension on a scale from -1 to 1:</li>", unsafe_allow_html=True)
+st.markdown("<ul>", unsafe_allow_html=True)
+st.markdown("<li><strong>-1:</strong> Completely opposite of the selected dimension</li>", unsafe_allow_html=True)
+st.markdown("<li><strong>0:</strong> Neutral or indifferent</li>", unsafe_allow_html=True)
+st.markdown("<li><strong>1:</strong> The epitome of the selected dimension</li>", unsafe_allow_html=True)
+st.markdown("</ul>", unsafe_allow_html=True)
+st.markdown("<li><strong>Receive Your Match:</strong> This algorithm identifies the closest sound to your ratings using two different mathematical techniques:</li>", unsafe_allow_html=True)
+st.markdown("<ul>", unsafe_allow_html=True)
+st.markdown("<li><strong>Euclidean Distance:</strong> A simple yet effective method that calculates the closest match based on direct distance measurements.</li>", unsafe_allow_html=True)
+st.markdown("<li><strong>Mahalanobis Distance:</strong> A more sophisticated method that considers correlations between dimensions for a more accurate match.</li>", unsafe_allow_html=True)
+st.markdown("</ul>", unsafe_allow_html=True)
+st.markdown("</ol>", unsafe_allow_html=True)
+
 # Function Header: loads the csv file data into two lists,
 # one including all of the data from the file, and one including only
 # the rating data found in the last 19 columns of the data file
@@ -137,9 +159,8 @@ def get_bilingual_dimension(dimension, dimension_translations):
     return f"{dimension} ({dimension_translations[dimension]})"
 
 # Add markdown to enhance text display
-st.markdown("<h1 style='color: violet;'>Welcome to the Audio Finder</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color: NavajoWhite;'>Select from the dimensions shown in the following list:</p>", unsafe_allow_html=True)
-st.markdown("<p style='color: NavajoWhite;'>Wählen Sie aus den in der folgenden Liste angezeigten Dimensionen:</p>", unsafe_allow_html=True)
+st.markdown("<center><h3 style='color: tomato;'>Select from the dimensions shown in the following list:</p></h3></center>", unsafe_allow_html=True)
+st.markdown("<center><h4 style='color: orange;'>Wählen Sie aus den in der folgenden Liste angezeigten Dimensionen:</p></h4></center>", unsafe_allow_html=True)
 
 # Display checkboxes for each dimension
 selected_dimensions = []
@@ -153,9 +174,9 @@ if num_dim == 0:
     st.warning("Please select at least 1 dimension. (Bitte wählen Sie mindestens 1 Dimension aus)")
 else:
     if num_dim > 1:
-        st.markdown(f"<p style='color: lime;'>You have selected {num_dim} dimensions. (Sie haben {num_dim} Dimensionen ausgewählt)</p>", unsafe_allow_html=True)
+        st.markdown(f"<center><p style='color: green;'>You have selected {num_dim} dimensions. (Sie haben {num_dim} Dimensionen ausgewählt)</p></center>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<p style='color: lime;'>You have selected {num_dim} dimension. (Sie haben {num_dim} Dimension ausgewählt)</p>", unsafe_allow_html=True)
+        st.markdown(f"<center><p style='color: green;'>You have selected {num_dim} dimension. (Sie haben {num_dim} Dimension ausgewählt)</p></center>", unsafe_allow_html=True)
 
 # user input for the selected dimensions using sliders
 user_ratings = []
@@ -193,15 +214,13 @@ if len(user_ratings) > 0:
                 <title>Play Audio</title>
             </head>
             <body>
-                <audio id="audioPlayerEuclidean" src="data:audio/mp3;base64,{audio_base64_euclidean}" type="audio/mpeg" controls></audio>
-            <center>    
-                <button onclick="document.getElementById('audioPlayerEuclidean').play()" style="background-color: MediumOrchid; color: white;">Play Euclidean Audio</button>
-            </center>
+                <audio id="audioPlayerEuclidean" src="data:audio/mp3;base64,{audio_base64_euclidean}" type="audio/mpeg" controls></audio>   
+                <button onclick="document.getElementById('audioPlayerEuclidean').play()" style="background-color: MediumOrchid; color: white; font-size: 16px; padding: 10px 20px; width: 200px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); border-radius: 12px;">Play Euclidean Audio</button>
             </body>
         </html>
         """
         with col1:
-            components.html(html_code_euclidean, height=100, width=400)
+            components.html(html_code_euclidean, height=150, width=400)
 
     else:
         st.error("Sound file not found. (Sounddatei nicht gefunden)")
@@ -230,15 +249,13 @@ if len(user_ratings) > 0:
                 <title>Play Audio</title>
             </head>
             <body>
-                <audio id="audioPlayerMahalanobis" src="data:audio/mp3;base64,{audio_base64_mahalanobis}" type="audio/mpeg" controls></audio>
-            <center>    
-                <button onclick="document.getElementById('audioPlayerMahalanobis').play()" style="background-color: CornflowerBlue; color: white;">Play Mahalanobis Audio</button>
-            </center>
+                <audio id="audioPlayerMahalanobis" src="data:audio/mp3;base64,{audio_base64_mahalanobis}" type="audio/mpeg" controls></audio>   
+                <button onclick="document.getElementById('audioPlayerMahalanobis').play()" style="background-color: CornflowerBlue; color: white; font-size: 16px; padding: 10px 20px; width: 200px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); border-radius: 12px;">Play Mahalanobis Audio</button>
             </body>
         </html>
         """
 
         with col2:
-            components.html(html_code_mahalanobis, height=100, width=400)
+            components.html(html_code_mahalanobis, height=150, width=400)
     else:
         st.error("Sound file not found. (Sounddatei nicht gefunden)")
