@@ -118,7 +118,7 @@ class SomunicateApp:
                         <li><strong>0:</strong> Neutral or indifferent</li>
                         <li><strong>1:</strong> The epitome of the selected dimension</li>
                     </ul>
-                    <li><strong>Receive Your Match:</strong> This algorithm identifies the top 10 closest sounds to your ratings using two different mathematical techniques:</li>
+                    <li><strong>Receive Your Match:</strong> This algorithm identifies the top 1-10 closest sounds to your ratings using two different mathematical techniques:</li>
                     <ul>
                         <li><strong>Euclidean Distance:</strong> A simple yet effective method that calculates the closest matches based on direct distance measurements.</li>
                         <li><strong>Mahalanobis Distance:</strong> A more sophisticated method that considers correlations between dimensions for more accurate matches.</li>
@@ -168,7 +168,7 @@ class SomunicateApp:
 
     # Function to find the closest sound using Euclidean distance
     @staticmethod
-    def find_closest_sounds_euclidean(user_ratings, dimensions, data, user_group_ids, top_n=10):
+    def find_closest_sounds_euclidean(user_ratings, dimensions, data, user_group_ids, top_n):
         # Filter data to only include the relevant dimensions
         specified_dimensions = data[dimensions]
 
@@ -195,7 +195,7 @@ class SomunicateApp:
 
     # Function to find the closest sound using Mahalanobis distance
     @staticmethod
-    def find_closest_sounds_mahalanobis(user_ratings, dimensions, data, inv_cov_matrix, user_group_ids, top_n=10):
+    def find_closest_sounds_mahalanobis(user_ratings, dimensions, data, inv_cov_matrix, user_group_ids, top_n):
         # Filter data to only include the relevant dimensions
         specified_dimensions = data[dimensions]
 
@@ -330,7 +330,7 @@ class SomunicateApp:
 
         return user_ratings, selected_dimensions
 
-    def display_results(self, user_ratings, selected_dimensions):
+    def display_results(self, user_ratings, selected_dimensions, top_n):
         """
         Displays the closest sounds based on user ratings.
         """
@@ -352,7 +352,7 @@ class SomunicateApp:
 
         if len(user_ratings) > 0:
             # Find the 5 closest sounds using Euclidean distance
-            closest_sounds_euclidean = self.find_closest_sounds_euclidean(user_ratings, [dim.split(' ')[0] for dim in selected_dimensions], self.final_combined_data, self.user_group_ids)
+            closest_sounds_euclidean = self.find_closest_sounds_euclidean(user_ratings, [dim.split(' ')[0] for dim in selected_dimensions], self.final_combined_data, self.user_group_ids, top_n)
             
             if not closest_sounds_euclidean.empty:
                 with col1:
@@ -362,7 +362,7 @@ class SomunicateApp:
                         st.write(closest_sounds_euclidean)
             
             # Find the 5 closest sounds using Mahalanobis distance
-            closest_sounds_mahalanobis = self.find_closest_sounds_mahalanobis(user_ratings, [dim.split(' ')[0] for dim in selected_dimensions], self.final_combined_data, self.inv_cov_matrix, self.user_group_ids)
+            closest_sounds_mahalanobis = self.find_closest_sounds_mahalanobis(user_ratings, [dim.split(' ')[0] for dim in selected_dimensions], self.final_combined_data, self.inv_cov_matrix, self.user_group_ids, top_n)
             
             if not closest_sounds_mahalanobis.empty:
                 with col2:
@@ -475,8 +475,13 @@ class SomunicateApp:
         self.groupID_data = self.load_groupID("groupid.csv")
         self.get_user_group_ids()
         user_ratings, selected_dimensions = self.get_target_dimensions_ratings()
-        self.display_results(user_ratings, selected_dimensions)
-
+        
+        # Check if dimensions are selected and rated
+        if selected_dimensions and user_ratings:
+            st.warning("Please select the number of sounds to be displayed.")
+            top_n = st.slider(f"Display Sound(s)", min_value=1, max_value=10, step=1)
+            self.display_results(user_ratings, selected_dimensions, top_n)
+        
 # Run the application
 app = SomunicateApp()
 app.run()
