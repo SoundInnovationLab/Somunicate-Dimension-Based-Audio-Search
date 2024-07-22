@@ -678,7 +678,7 @@ class SomunicateApp:
         
         # Check if dimensions are selected and rated
         if selected_dimensions and user_ratings:
-            with st.expander("Please select the number of sounds to be displayed: "):
+            with st.expander("Please Select the Number of Sounds to be Displayed: "):
                 top_n = st.slider(f"Display Sound(s)", min_value=1, max_value=10, value = 3, step=1)
             with st.expander(f"Weight Liking and Familiarity"):
                 st.session_state.MIN_LIKING = st.slider(f"Weight Min-Liking: ", min_value = 0, max_value = 100, value = 0, step = 1)
