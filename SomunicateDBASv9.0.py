@@ -221,7 +221,7 @@ class SomunicateApp:
                 </style>
                 <div class='custom-container'>
                     <ol class='custom-bullet'>
-                        <li><strong>Select Your Demographic Group:</strong> Choose parameters such as gender, migration background, and age group. This selection helps refine the search to find sounds that are more likely to be preferred by those with similar demographics.</li>
+                        <li><strong>Select Your Demographic Group:</strong> Choose parameters such as gender, migration background, and age group. When liking and familiarity weightings are factored in, this selection helps refine the search to find sounds that are more likely to be preferred by those with similar demographics.</li>
                         <li><strong>Select Your Dimensions:</strong> Choose from 19 distinct sound dimensions, each capturing a unique aspect of audio quality.</li>
                         <li><strong>Rate Each Dimension:</strong> Provide your ratings for each chosen dimension on a scale from -1 to 1:
                             <ul>
