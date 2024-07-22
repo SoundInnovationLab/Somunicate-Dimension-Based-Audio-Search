@@ -146,9 +146,11 @@ class SomunicateApp:
 
     def show_header(self):
         # Centered title with 3D effect
-        st.markdown(
-            "<div class='custom-container'><center><h1>Welcome to Somunicate Audio Search</h1></center></div>",
-            unsafe_allow_html=True
+        st.markdown("""
+            <div class='custom-container' style='color: #8A2BE2; text-align: center;'>
+                <h1>Welcome to Somunicate Audio Search</h1>
+                </div>
+            """, unsafe_allow_html=True
         )
 
         st.markdown("""
