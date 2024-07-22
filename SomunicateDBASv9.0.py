@@ -438,11 +438,6 @@ class SomunicateApp:
         # Collect the IDs from the filtered DataFrame
         self.user_group_ids = filtered_data['Group ID'].tolist()
 
-        ########### DEBUG #############
-        with st.expander("DEBUG: User Group IDs: "):
-            # Display the selected group IDs
-            st.write("User Group IDs:", self.user_group_ids)
-
         return self.user_group_ids
 
     def get_target_dimensions_ratings(self):
