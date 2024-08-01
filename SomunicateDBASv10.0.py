@@ -18,6 +18,8 @@ import base64
 
 NUM_DEMOGRAPHIC_GROUPS = 12
 
+import pandas as pd
+
 class AudioScoreCalculator:
     def __init__(self, user_group_ids):
         self.user_group_ids = user_group_ids
@@ -29,8 +31,13 @@ class AudioScoreCalculator:
         count_familiarity = 0
 
         for id in self.user_group_ids:
-            current_liking = int(row.get(str(id), 0))  # Ensure current_liking is an int
-            current_familiarity = int(row.get(str(id + 12), 0))  # Ensure current_familiarity is an int
+            # Get the liking and familiarity scores, replacing NaN with 0
+            current_liking = row.get(str(id), 0)
+            current_familiarity = row.get(str(id + 12), 0)
+            
+            # Handle cases where the value might be NaN
+            current_liking = 0 if pd.isna(current_liking) else int(current_liking)
+            current_familiarity = 0 if pd.isna(current_familiarity) else int(current_familiarity)
 
             total_liking += current_liking
             count_liking += 1
@@ -308,11 +315,13 @@ class SomunicateApp:
 
         filtered_indices = []
         for index in top_indices:
-            # First condition: Liking data check
-            condition1 = any(final_combined_data.iloc[index][str(group_id)] >= st.session_state.MIN_LIKING for group_id in user_group_ids)
+            # First condition: Average liking data check
+            average_liking = np.mean([final_combined_data.iloc[index][str(group_id)] for group_id in user_group_ids])
+            condition1 = average_liking >= st.session_state.MIN_LIKING
 
-            # Second condition: Familiarity data check
-            condition2 = any(final_combined_data.iloc[index][str(group_id + 12)] >= st.session_state.MIN_FAMILIARITY for group_id in user_group_ids)
+            # Second condition: Average familiarity data check
+            average_familiarity = np.mean([final_combined_data.iloc[index][str(group_id + 12)] for group_id in user_group_ids])
+            condition2 = average_familiarity >= st.session_state.MIN_FAMILIARITY
 
             # Both conditions combined
             if condition1 and condition2:
@@ -561,33 +570,36 @@ class SomunicateApp:
             
             #### EUCLIDEAN ####
 
-            if not closest_sounds_euclidean.empty:
-                with col2:
-                    Euclidean_Display_Check = st.checkbox("Display Euclidean Sounds?")
-                    if Euclidean_Display_Check:
-                        with st.expander("See Advanced Euclidean"):
-                            st.write("Top audio matches based on Euclidean distance:")
-                            st.write(closest_sounds_euclidean)
+
+            with col2:
+                Euclidean_Display_Check = st.checkbox("Display Euclidean Sounds?")
+                if Euclidean_Display_Check:
+                    with st.expander("See Advanced Euclidean"):
+                        st.write("Top Audio Matches Based on Euclidean Distance:")
+                        st.write(closest_sounds_euclidean)
+                    if len(closest_sounds_euclidean) < top_n: 
+                        st.warning(f"Cannot Display {top_n - len(closest_sounds_euclidean)} Additional Sound(s) With Current Weights")
             
             # Find the 1-10 closest sounds using Mahalanobis distance
             closest_sounds_mahalanobis = self.find_closest_sounds_mahalanobis(user_ratings, [dim.split(' ')[0] for dim in selected_dimensions], self.final_combined_data, self.inv_cov_matrix, self.user_group_ids, top_n)
             
             #### MAHALANOBIS ####
 
-            if not closest_sounds_mahalanobis.empty:
-                with col1:
-                    with st.expander("See Advanced Mahalanobis"):
-                        st.write("Top audio matches based on Mahalanobis distance:")
-                        st.write(closest_sounds_mahalanobis)
+            with col1:
+                with st.expander("See Advanced Mahalanobis"):
+                    st.write("Top Audio Matches Based on Mahalanobis Distance:")
+                    st.write(closest_sounds_mahalanobis)
+                if len(closest_sounds_mahalanobis) < top_n: 
+                    st.warning(f"Cannot Display {top_n - len(closest_sounds_mahalanobis)} Additional Sound(s) With Current Weights")
 
             #### EUCLIDEAN ####
 
             if Euclidean_Display_Check:
                 euc_audio_num = 0
-                audio_calculator = AudioScoreCalculator(self.user_group_ids)  # Instantiate the calculator
+                audio_calc = AudioScoreCalculator(self.user_group_ids)  # Instantiate the calculator
                 # Display audio player for each closest sound (Euclidean)
                 for i, row in closest_sounds_euclidean.iterrows():
-                    top_audio_liking, top_audio_familiarity = audio_calculator.calculate_scores(row)
+                    av_audio_liking, av_audio_familiarity = audio_calc.calculate_scores(row)
 
                     euc_audio_num += 1
                     sound_file_name = row['sound'].strip().lstrip('/')
@@ -637,8 +649,8 @@ class SomunicateApp:
                                 margin-top: -15px;
                                 margin-bottom: 5px;">
                                 <i><b><strong>Euclidean Based:</strong> {audio_closeness_display[euc_audio_num]}<br>
-                                <strong>Liking:</strong> {top_audio_liking}<br>
-                                <strong>Familiarity:</strong> {top_audio_familiarity}</b></i>
+                                <strong>Liking:</strong> {av_audio_liking}<br>
+                                <strong>Familiarity:</strong> {av_audio_familiarity}</b></i>
                             </div>
                             """, unsafe_allow_html=True)
                     else:
@@ -651,8 +663,8 @@ class SomunicateApp:
 
             # Display audio player for each closest sound (Mahalanobis)
             for i, row in closest_sounds_mahalanobis.iterrows():
-                top_audio_liking, top_audio_familiarity = audio_calculator.calculate_scores(row)
-
+                av_audio_liking, av_audio_familiarity = audio_calculator.calculate_scores(row)
+                
                 mah_audio_num += 1
 
                 sound_file_name = row['sound'].strip().lstrip('/')
@@ -708,8 +720,8 @@ class SomunicateApp:
                             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5), 
                                         2px 2px 4px rgba(255, 255, 255, 0.2);">
                             <i><b><strong>Mahalanobis Based:</strong> {audio_closeness_display[mah_audio_num]}<br>
-                            <strong>Liking:</strong> {top_audio_liking}<br>
-                            <strong>Familiarity:</strong> {top_audio_familiarity}</b></i>
+                            <strong>Liking:</strong> {av_audio_liking}<br>
+                            <strong>Familiarity:</strong> {av_audio_familiarity}</b></i>
                         </div>
                         """, unsafe_allow_html=True)
                 else:
